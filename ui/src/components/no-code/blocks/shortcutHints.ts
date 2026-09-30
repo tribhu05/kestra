@@ -6,26 +6,42 @@ export interface FooterHint {
     i18nKey: string
 }
 
-const KEY_DISPLAY: Record<string, string> = {
-    ArrowUp: "↑",
-    ArrowDown: "↓",
-    ArrowLeft: "←",
-    ArrowRight: "→",
-    Enter: "↵",
-    "Meta+Enter": "⌘↵",
-    "Control+Enter": "⌘↵",
-    " ": "Space",
-    Backspace: "⌫",
-    Delete: "⌦",
-    "Meta+Shift+p": "⌘⇧P",
-    "Control+Shift+p": "⌘⇧P",
-    "Meta+s": "⌘S",
-    "Control+s": "⌘S",
-    "Meta+z": "⌘Z",
-    "Control+z": "⌘Z",
-    "Alt+ArrowUp": "⌥↑",
-    "Alt+ArrowDown": "⌥↓",
+export function computeIsMac(nav: {platform?: string; userAgent?: string} = navigator): boolean {
+    return /Mac|iPhone|iPod|iPad/i.test(nav.platform || nav.userAgent || "")
 }
+
+/**
+ * `Meta` (Mac) and `Control` (Windows/Linux) are never two distinct bindings in this keymap —
+ * the same shortcut written once per OS convention — so both resolve to the platform's own glyph
+ * rather than always to `⌘`, which read wrong on Windows and Linux.
+ */
+export function buildKeyDisplay(isMac: boolean): Record<string, string> {
+    const cmd = isMac ? "⌘" : "Ctrl+"
+    const shift = isMac ? "⇧" : "Shift+"
+    const alt = isMac ? "⌥" : "Alt+"
+    return {
+        ArrowUp: "↑",
+        ArrowDown: "↓",
+        ArrowLeft: "←",
+        ArrowRight: "→",
+        Enter: "↵",
+        "Meta+Enter": `${cmd}↵`,
+        "Control+Enter": `${cmd}↵`,
+        " ": "Space",
+        Backspace: "⌫",
+        Delete: "⌦",
+        "Meta+Shift+p": `${cmd}${shift}P`,
+        "Control+Shift+p": `${cmd}${shift}P`,
+        "Meta+s": `${cmd}S`,
+        "Control+s": `${cmd}S`,
+        "Meta+z": `${cmd}Z`,
+        "Control+z": `${cmd}Z`,
+        "Alt+ArrowUp": `${alt}↑`,
+        "Alt+ArrowDown": `${alt}↓`,
+    }
+}
+
+const KEY_DISPLAY = buildKeyDisplay(computeIsMac())
 
 const SHORTCUT_GROUP_ORDER: BlockEditorKeymapGroup[] = ["navigate", "insert", "edit", "global"]
 
